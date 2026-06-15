@@ -1,0 +1,17 @@
+# Local Claude Code harness state (not part of the template)
+.claude/settings.local.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*~
+.*.swp
+
+# Obsidian workspace state (keep notes, ignore local UI state)
+.obsidian/workspace*
+.obsidian/cache
+
+# Generated docs-site output (when a generator is added later)
+/site/
+/_site/
+.quarto/
