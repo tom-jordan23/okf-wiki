@@ -132,16 +132,28 @@ Reserved files (`index.md`, `log.md`) use a minimal block with **no `type`** —
   changes.
 - Treat `docs/` as the optional publish surface; keep markdown portable.
 
+## Validation
+
+Run the checker before committing changes to the bundle:
+
+```sh
+python3 scripts/validate.py                       # checks okf/
+python3 scripts/validate.py --today 2026-01-01    # override date for staleness checks
+```
+
+It enforces OKF conformance as **errors** (frontmatter parseable, non-empty `type` on
+non-reserved files, no `type` on reserved files — non-zero exit on failure) and reports
+integrity issues as **warnings** (claim-bearing notes with empty `sources`, overdue
+`review_by`, unresolved links). No third-party dependencies. Run on demand for now; CI
+wiring is on the roadmap.
+
 ## Roadmap (not built yet)
 
 Deferred by choice, in rough order:
 
-1. A `scripts/validate.py` that checks OKF conformance (frontmatter parseable,
-   non-empty `type` on non-reserved files, reserved-file roles) plus our integrity
-   rules (required `sources`, overdue `review_by`) — runnable locally.
-2. CI (GitLab CI / GitHub Actions) that runs the validator on merge requests.
-3. Issue + MR/PR templates wired to the integrity workflow.
-4. A docs-site generator config for publishing `docs/`.
+1. CI (GitLab CI / GitHub Actions) that runs `scripts/validate.py` on merge requests.
+2. Issue + MR/PR templates wired to the integrity workflow.
+3. A docs-site generator config for publishing `docs/`.
 
 ## Project
 

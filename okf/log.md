@@ -14,6 +14,13 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-06-15 — Hosted on GitHub; added validator
+
+- Renamed the template `llm-wiki` → `okf-wiki` and published it as a public GitHub
+  template repository: https://github.com/tom-jordan23/okf-wiki
+- Added `scripts/validate.py`: OKF conformance (errors) + integrity checks (warnings).
+  See the Validation section in `CLAUDE.md`. Bundle currently passes.
+
 ## 2026-06-15 — Aligned the bundle to OKF v0.1
 
 - Adopted [OKF v0.1](sources/okf-v0-1-spec.md) as the base format; see
