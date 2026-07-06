@@ -14,6 +14,14 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-07-06 — Added the phase-1 POC runbook for ADR-0003
+
+- Added [leadership-chat POC runbook](runbooks/leadership-chat-poc.md) (`draft`): the
+  headless phase-1 procedure to prove the agentic-navigation loop answers from the bundle
+  while preserving citations, `status`-awareness, and grounded-vs-inferred separation.
+  Includes the four-probe set (verified lookup / draft-only / scenario / unsupported) that
+  seeds the phase-4 eval gate. Not yet executed — status stays `draft` until it is run.
+
 ## 2026-07-05 — ADR-0003: leave the door open to the platform team's AI gateway
 
 - Recorded that a platform team is building a shared AI gateway (LiteLLM + MCP) to proxy
