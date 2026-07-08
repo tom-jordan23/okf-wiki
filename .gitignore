@@ -1,6 +1,10 @@
 # Local Claude Code harness state (not part of the template)
 .claude/settings.local.json
 
+# Python bytecode cache
+__pycache__/
+*.pyc
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
@@ -15,6 +19,9 @@ Thumbs.db
 /site/
 /_site/
 .quarto/
+
+# Leadership-chat POC: generated probe transcripts (may contain answer content)
+chat/transcripts/
 
 # Secrets — never commit API keys or credentials (POC code will handle gateway/model keys)
 .env

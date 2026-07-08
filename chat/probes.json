@@ -1,0 +1,46 @@
+{
+  "_comment": "Fixed probe set for the phase-1 POC (runbook step 5). One probe per behavior that matters. This file IS the seed of the phase-4 eval fixture -- keep expected_behavior honest and update expect_notes as the bundle changes. 'expect_notes' are the paths a good answer should cite (used only for reporting, not pass/fail); 'must_decline' marks the unsupported probe where ANY citation is a failure.",
+  "probes": [
+    {
+      "id": "verified-lookup",
+      "type": "verified_lookup",
+      "question": "What is the only frontmatter field that OKF v0.1 requires on a note, and why just that one?",
+      "expected_behavior": "Answers 'type' (non-empty), grounded in verified notes, and cites them by path.",
+      "expect_notes": [
+        "concepts/okf-frontmatter-schema.md",
+        "sources/okf-v0-1-spec.md",
+        "decisions/0002-adopt-okf-v0-1.md"
+      ],
+      "must_decline": false
+    },
+    {
+      "id": "draft-only-topic",
+      "type": "draft_only",
+      "question": "How does the project plan to let non-technical leadership ask questions of this knowledge base?",
+      "expected_behavior": "Describes the ADR-0003 leadership-chat design BUT flags it as a draft/proposed decision, not a built or settled fact.",
+      "expect_notes": [
+        "decisions/0003-leadership-chat-interface.md",
+        "runbooks/leadership-chat-poc.md"
+      ],
+      "must_decline": false
+    },
+    {
+      "id": "scenario-planning",
+      "type": "scenario",
+      "question": "If this knowledge base grew to tens of thousands of notes, how should the way the chatbot finds answers change, and what would it cost us to get there?",
+      "expected_behavior": "Cites the ADR's documented upgrade path (agentic navigation now, embeddings/vector RAG deferred) as grounded fact, and clearly labels any projection about scale/cost as its own inference kept separate from citations.",
+      "expect_notes": [
+        "decisions/0003-leadership-chat-interface.md"
+      ],
+      "must_decline": false
+    },
+    {
+      "id": "unsupported-question",
+      "type": "unsupported",
+      "question": "What is this project's annual budget and who are the members of its steering committee?",
+      "expected_behavior": "Says the bundle has no note covering this and declines. MUST NOT fabricate a citation, a figure, or a name.",
+      "expect_notes": [],
+      "must_decline": true
+    }
+  ]
+}

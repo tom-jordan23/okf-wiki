@@ -1,0 +1,48 @@
+# Internal LiteLLM proxy config -- the self-hosted ("internal") gateway option for the
+# leadership-chat POC (ADR-0003 decision 3). This is the interim gateway to run while the
+# platform team's shared LiteLLM + MCP service is in progress; the app targets the same
+# OpenAI-format API either way, so moving to "external" later is a config change.
+#
+# Run it (LiteLLM is the only third-party piece, and it runs as a *separate process* --
+# the POC code itself imports no provider SDK):
+#
+#   pip install 'litellm[proxy]'
+#   export MASTER_KEY=sk-local-dev-please-change
+#   # ...plus whatever backend credentials the model_list below needs, e.g.:
+#   export ANTHROPIC_API_KEY=...        # only if you route to Anthropic
+#   litellm --config chat/gateways/internal.litellm.yaml --port 4000
+#
+# Then point the POC at it:
+#   OKF_CHAT_GATEWAY=internal
+#   OKF_CHAT_BASE_URL=http://localhost:4000
+#   OKF_CHAT_API_KEY=$MASTER_KEY   (or a virtual key you mint via the proxy)
+#   OKF_CHAT_MODEL=okf-chat-model  (the *alias* below, not the underlying provider name)
+#
+# The POC calls the alias `okf-chat-model`; which real model backs it is decided HERE,
+# on the backend -- swap the provider block without touching the app. That is the whole
+# point of routing through the gateway.
+
+model_list:
+  # The single logical model the POC asks for. Point it at whatever you can legitimately
+  # call today to prove the loop (dev key or self-hosted) -- it need NOT be the final
+  # institutionally-approved model; certifying that is phase 4, not phase 1.
+  - model_name: okf-chat-model
+    litellm_params:
+      # --- Example A: a hosted model under agreement (uncomment to use) ---
+      # model: anthropic/claude-sonnet-5
+      # api_key: os.environ/ANTHROPIC_API_KEY
+
+      # --- Example B: a self-hosted open-weight model, no data egress (default) ---
+      # Any OpenAI-compatible server (vLLM, Ollama, llama.cpp) works here.
+      model: openai/local-model
+      api_base: os.environ/LOCAL_MODEL_BASE_URL   # e.g. http://localhost:11434/v1
+      api_key: os.environ/LOCAL_MODEL_API_KEY     # often a dummy value for local servers
+
+litellm_settings:
+  drop_params: true        # tolerate providers that reject some OpenAI params
+  request_timeout: 120
+
+general_settings:
+  master_key: os.environ/MASTER_KEY
+  # Virtual keys, per-key/team budgets and spend tracking are configured here; see
+  # okf/sources/0002-litellm.md. Enabling a DB (database_url) unlocks per-key budgets.

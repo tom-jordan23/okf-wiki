@@ -14,6 +14,21 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-07-08 — Built the phase-1 POC for ADR-0003 (leadership chat)
+
+- Implemented the [phase-1 POC runbook](runbooks/leadership-chat-poc.md) as runnable code
+  under `chat/` (outside the bundle — implementation, not a note): a provider-agnostic
+  OpenAI-format tool-use loop over read-only `read_file`/`list_dir`/`grep` scoped to the
+  `okf/` checkout, driven by the integrity system prompt, with a runner that executes the
+  four-probe set and auto-flags fabricated citations and missing declines. Stdlib only.
+- Gateway (decision 3) built as an **interface** with two interchangeable profiles —
+  **internal** self-hosted [LiteLLM](sources/0002-litellm.md) or an **external** shared
+  gateway — switchable by env/config alone, no code change. Navigator kept as a standalone
+  module so it can later become the MCP server of decision 6.
+- Not yet run against a model, so [ADR-0003](decisions/0003-leadership-chat-interface.md)
+  and the runbook stay `draft`: the POC de-risks the design but only executing the probes
+  on an approved model can move them toward `verified` / *accepted* (phase 4).
+
 ## 2026-07-06 — Added the phase-1 POC runbook for ADR-0003
 
 - Added [leadership-chat POC runbook](runbooks/leadership-chat-poc.md) (`draft`): the
