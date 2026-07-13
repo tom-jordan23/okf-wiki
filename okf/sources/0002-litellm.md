@@ -4,13 +4,13 @@ type: source
 title: "LiteLLM — SDK & Proxy Server (AI Gateway)"
 description: BerriAI's open-source unified API and self-hosted gateway for 100+ LLMs, with per-key/team/user cost tracking, budgets, and rate limits.
 tags: [source, llm, gateway, infrastructure]
-timestamp: 2026-07-05
+timestamp: 2026-07-13
 resource: https://docs.litellm.ai/docs/
 # --- integrity extension (NOT part of OKF) ---
 status: verified
 confidence: high
 created: 2026-07-05
-last_verified: 2026-07-05
+last_verified: 2026-07-13
 verified_by: claude
 review_by: 2027-01-05
 # --- source evidence fields ---
@@ -72,6 +72,22 @@ repository:
   (`/mcp-rest/tools/list`, `/mcp-rest/tools/call`), or the `/chat/completions` tool-calling
   path. This is why a LiteLLM-based gateway can govern *both* LLM traffic and MCP tool
   traffic through a single control point.
+- **Audio endpoints — STT & TTS in the same OpenAI format (verified against the docs,
+  accessed 2026-07-13).** Beyond chat, the proxy exposes OpenAI-compatible **audio**
+  routes, so speech is governed through the *same* gateway as text:
+  - **Speech-to-text** at **`/v1/audio/transcriptions`** — docs list supported providers
+    `openai` (whisper-1), `azure`, `vertex_ai`, `gemini`, `deepgram`, `groq`
+    (whisper-large-v3), `fireworks_ai`, `ovhcloud`, `mistral` (Voxtral) — with fallback
+    routing, cost tracking, logging, and guardrails on the transcribed text.
+  - **Text-to-speech** at **`/v1/audio/speech`** — docs list `openai`, `azure`,
+    `vertex_ai`, AWS **Polly**, **ElevenLabs**, MiniMax, and Azure AI Speech, with cost
+    tracking, logging, and load-balancing; a bridge also lets `/chat/completions` TTS
+    models answer through `/audio/speech`.
+  This is the evidence that a **voice** interface (STT → text loop → TTS,
+  [ADR-0004](../decisions/0004-voice-interface.md)) can route audio through the same
+  virtual-key spend tracking and approved-provider abstraction as chat — including
+  self-hostable STT/TTS routes that keep audio inside the institutional boundary — rather
+  than bolting on a separate voice SaaS.
 - **License.** The **core is MIT-licensed** (© Berri AI). Content under the
   `enterprise/` directory is governed by a **separate license** (`enterprise/LICENSE`);
   a paid enterprise tier adds features such as SSO, RBAC, and audit logs. The

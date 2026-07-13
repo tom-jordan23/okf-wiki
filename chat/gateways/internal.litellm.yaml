@@ -38,6 +38,21 @@ model_list:
       api_base: os.environ/LOCAL_MODEL_BASE_URL   # e.g. http://localhost:11434/v1
       api_key: os.environ/LOCAL_MODEL_API_KEY     # often a dummy value for local servers
 
+  # --- Voice (ADR-0004): STT + TTS through THIS SAME gateway ------------------------
+  # The voice POC asks for these two aliases; which real audio model backs each is a
+  # backend choice here, exactly like okf-chat-model. Prefer a self-hosted route (e.g.
+  # self-hosted Whisper / on-prem TTS) if audio must not leave the institutional boundary.
+  # LiteLLM exposes them at /v1/audio/transcriptions and /v1/audio/speech
+  # (see okf/sources/0002-litellm.md). Uncomment and point at what you can call today.
+  # - model_name: okf-stt-model            # speech -> text
+  #   litellm_params:
+  #     model: openai/whisper-1            # or azure/…, groq/whisper-large-v3, deepgram/…
+  #     api_key: os.environ/OPENAI_API_KEY
+  # - model_name: okf-tts-model            # text -> speech
+  #   litellm_params:
+  #     model: openai/tts-1                # or azure/…, vertex_ai/…, elevenlabs/…
+  #     api_key: os.environ/OPENAI_API_KEY
+
 litellm_settings:
   drop_params: true        # tolerate providers that reject some OpenAI params
   request_timeout: 120

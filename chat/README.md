@@ -24,6 +24,9 @@ is the seed of the phase-4 eval fixture.
 | `probes.json` | The fixed 4-probe set + expected behaviors (verified lookup / draft-only / scenario / unsupported). |
 | `run_poc.py` | Runs the probe set, saves transcripts, auto-checks for **fabricated citations** and **decline** behavior. |
 | `gateways/` | Internal LiteLLM starter config + `*.env.example` templates for both gateway modes. |
+| `voice.py` | **Voice (ADR-0004):** STT / TTS through the **same** gateway (`/audio/transcriptions`, `/audio/speech`) + the `SPOKEN`/`PROVENANCE` channel split and the spoken-channel path-leak check. Stdlib multipart, no `requests`. |
+| `voice_addendum.md` | Voice-mode prompt addendum appended to `system_prompt.md`: emit a heard `SPOKEN` track (confidence in words, no paths) + a shown `PROVENANCE` track (paths + `status`). |
+| `run_voice_poc.py` | Runs the same probe set through **STT → the unchanged loop → TTS**, checks fabricated citations + decline (on `PROVENANCE`) **and** no path leaked into `SPOKEN`, and writes the spoken audio. |
 
 No third-party dependencies in the POC code itself — stdlib Python 3 only, same as
 `scripts/validate.py`. (LiteLLM, if you self-host it, runs as a **separate process**; the
@@ -80,6 +83,35 @@ python3 chat/run_poc.py --env-file chat/.env
 ```sh
 python3 chat/run_poc.py --env-file chat/.env --question "What does OKF require on a note?"
 ```
+
+## Voice (ADR-0004, phase 1)
+
+Voice is a thin shell around the **same** loop above:
+`question → [STT] → the unchanged agent → answer → [TTS] → audio`. It changes nothing about
+retrieval or grounding — it adds a transcribe step before and a synthesize step after, and
+both audio calls go through the **same gateway** as chat (see
+[ADR-0004](../okf/decisions/0004-voice-interface.md) and the
+[voice-chat runbook](../okf/runbooks/voice-chat-poc.md)).
+
+Provenance survives the audio channel by splitting each answer into a **`SPOKEN`** track
+(read aloud — confidence carried in words, never a file path) and a **`PROVENANCE`** track
+(shown/logged — the note paths + `status`). The citation checks run on `PROVENANCE`; a new
+gate fails any run that **leaks a note path into `SPOKEN`**.
+
+```sh
+# Offline: fake STT/TTS + scripted model — proves the whole pipeline with no key.
+python3 chat/run_voice_poc.py --dry-run
+python3 chat/run_voice_poc.py --dry-run --round-trip     # also faked TTS->STT of the question
+
+# Real gateway (add the STT/TTS model vars to chat/.env first — see the env examples):
+python3 chat/run_voice_poc.py --env-file chat/.env
+python3 chat/run_voice_poc.py --env-file chat/.env --round-trip   # speak each probe Q, hear it back, answer
+python3 chat/run_voice_poc.py --env-file chat/.env --audio question.wav   # answer one spoken question
+```
+
+Spoken audio + JSON transcripts land in `chat/transcripts/voice/` (git-ignored). As with the
+text POC, the automated checks (fabricated citations, decline, path leaks) are the floor —
+**whether the spoken track is honestly phrased is a human call: listen to it.**
 
 ## Reading the results
 
