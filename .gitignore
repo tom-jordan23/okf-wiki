@@ -23,6 +23,9 @@ Thumbs.db
 # Leadership-chat POC: generated probe transcripts (may contain answer content)
 chat/transcripts/
 
+# Self-deployable env (ADR-0005): bootstrap-generated trust manifest may hold org detail
+deploy/deployment.manifest.md
+
 # Secrets — never commit API keys or credentials (POC code will handle gateway/model keys)
 .env
 .env.*

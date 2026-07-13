@@ -1,0 +1,74 @@
+# Self-deployable OKF knowledge assistant (ADR-0005) -- one command brings up the dataset,
+# the gateway, and the chat/voice app. Two egress profiles, chosen by `deploy/bootstrap.py`:
+#
+#   HOSTED (default)  : gateway -> approved CLOUD LLM/STT/TTS (bring your own key).
+#                       `docker compose up`
+#   NO-EGRESS         : everything local -- open-weight LLM (Ollama) + self-hosted Whisper
+#                       STT + local Kokoro TTS. Nothing leaves the host.
+#                       `docker compose --profile no-egress up`
+#
+# The gateway config file and the compose profile are set in deploy/.env by the bootstrap
+# (OKF_GATEWAY_CONFIG, OKF_COMPOSE_PROFILE). Run via the bootstrap or read deploy/README.md.
+name: okf-wiki
+
+services:
+  # --- the thin web + voice app (always on) ---------------------------------------
+  app:
+    build:
+      context: ..                      # repo root, so the image can copy chat/ + okf/
+      dockerfile: deploy/Dockerfile
+    env_file: [.env]
+    environment:
+      OKF_CHAT_BASE_URL: http://gateway:4000   # the app talks ONLY to the gateway
+      OKF_BUNDLE: /data/okf
+    volumes:
+      - ../okf:/data/okf:ro            # dataset read-only; refresh with `git pull` on host
+    ports:
+      - "${OKF_CHAT_PORT:-8080}:8080"
+    depends_on: [gateway]
+    restart: unless-stopped
+
+  # --- the gateway: the one place model choice, keys, and spend live (ADR-0003) -----
+  gateway:
+    image: ghcr.io/berriai/litellm:v1.92.0    # pin a real release: github.com/BerriAI/litellm/releases
+    command: ["--config", "/etc/litellm/config.yaml", "--port", "4000"]
+    env_file: [.env]                   # provider keys / MASTER_KEY come from here
+    volumes:
+      # bootstrap sets OKF_GATEWAY_CONFIG to litellm.hosted.yaml or litellm.no-egress.yaml
+      - ./gateway/${OKF_GATEWAY_CONFIG:-litellm.hosted.yaml}:/etc/litellm/config.yaml:ro
+    expose: ["4000"]
+    restart: unless-stopped
+
+  # --- NO-EGRESS profile: local inference, nothing leaves the host -----------------
+  # Open-weight LLM. Exposes an OpenAI-format API at http://ollama:11434/v1 that the
+  # gateway's no-egress config points okf-chat-model at. Pull a model once it's up:
+  #   docker compose exec ollama ollama pull llama3.1:8b-instruct
+  # For GPU, add a `deploy.resources.reservations.devices` block per your runtime.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["no-egress"]
+    volumes:
+      - ollama:/root/.ollama
+    expose: ["11434"]
+    restart: unless-stopped
+
+  # Self-hosted Whisper STT, OpenAI-compatible /v1/audio/transcriptions.
+  # (github.com/hwdsl2/docker-whisper -- confirm the model + exposed port for your build.)
+  whisper:
+    image: hwdsl2/whisper-server:latest
+    profiles: ["no-egress"]
+    environment:
+      ASR_MODEL: ${OKF_WHISPER_MODEL:-base}
+    expose: ["8000"]                   # gateway targets http://whisper:8000/v1 -- verify port
+    restart: unless-stopped
+
+  # Local Kokoro TTS, OpenAI-compatible /v1/audio/speech.
+  # (github.com/hwdsl2/docker-kokoro -- confirm the exposed port for your build.)
+  kokoro:
+    image: hwdsl2/kokoro-server:latest
+    profiles: ["no-egress"]
+    expose: ["8880"]                   # gateway targets http://kokoro:8880/v1 -- verify port
+    restart: unless-stopped
+
+volumes:
+  ollama:

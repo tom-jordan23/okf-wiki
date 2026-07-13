@@ -1,0 +1,35 @@
+# Gateway config for the NO-EGRESS profile (ADR-0005): the same three app-facing aliases,
+# but every one routed to a LOCAL service on the compose network. Nothing leaves the host --
+# no cloud endpoints, no keys, no telemetry. This is the profile that honours the project's
+# data-egress thesis.
+#
+# The `api_base` hosts below are the compose service names (ollama / whisper / kokoro). The
+# ports must match what each image actually exposes -- CONFIRM against each image's docs and
+# the ports in docker-compose.yml before relying on this. `api_key` is a dummy: local
+# OpenAI-compatible servers ignore it but LiteLLM wants the field present.
+
+model_list:
+  - model_name: okf-chat-model          # open-weight LLM via Ollama's OpenAI-format API
+    litellm_params:
+      model: openai/llama3.1:8b-instruct # must match a model you `ollama pull`ed
+      api_base: http://ollama:11434/v1
+      api_key: "sk-no-egress-local"
+
+  - model_name: okf-stt-model           # self-hosted Whisper, /v1/audio/transcriptions
+    litellm_params:
+      model: openai/whisper-1
+      api_base: http://whisper:8000/v1   # verify the port your whisper image exposes
+      api_key: "sk-no-egress-local"
+
+  - model_name: okf-tts-model           # local Kokoro TTS, /v1/audio/speech
+    litellm_params:
+      model: openai/kokoro
+      api_base: http://kokoro:8880/v1    # verify the port your kokoro image exposes
+      api_key: "sk-no-egress-local"
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 180                   # local models can be slower on first token
+
+general_settings:
+  master_key: os.environ/MASTER_KEY

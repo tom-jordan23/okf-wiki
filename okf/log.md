@@ -14,6 +14,32 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-07-13 — ADR-0005: self-deployable environment + thin web/voice app
+
+- Added [ADR-0005](decisions/0005-self-deployable-environment.md) (`draft`/proposed): package
+  the whole effort — dataset, gateway, and the chat/voice interface — as a **single
+  Compose-first environment** (Helm deferred), with two egress profiles chosen at bootstrap:
+  **no-egress** (open-weight LLM via Ollama + self-hosted Whisper + local Kokoro TTS, nothing
+  leaves the host) or **hosted** (gateway → approved cloud, BYO key). The gateway abstraction
+  makes the choice a config swap, not a code change.
+- Built the interface ADR-0003/0004 phase 2 implied and only POCs existed for: a **stdlib web
+  + voice server** (`chat/server.py` + `chat/web/index.html`) reusing the unchanged loop and
+  the `SPOKEN`/`PROVENANCE` split — text chat + push-to-talk, with the Sources panel shown on
+  screen. App holds no keys and talks only to the gateway.
+- Packaged it under `deploy/`: `Dockerfile` (stdlib-only, tiny), `docker-compose.yml` (app +
+  gateway always on; ollama/whisper/kokoro behind the `no-egress` profile), two gateway
+  configs, and `.env.example`. Verified the image references against upstream (LiteLLM
+  `ghcr.io/berriai/litellm`; OpenAI-compatible `hwdsl2/whisper-server` + `hwdsl2/kokoro-server`).
+- Added a **trust-aware `deploy/bootstrap.py`**: an interview that records — dated — which
+  datasets are trusted (validated via `scripts/validate.py`) and who vouches, the
+  sensitivity/egress posture (→ profile), and the access boundary (who is "leadership" + an
+  access token), then writes `.env` (git-ignored) and a `deployment.manifest.md` provenance
+  record. Extends the integrity ethos from notes to the deployment.
+- Extended the [LiteLLM source note](sources/0002-litellm.md): it ships official Docker images
+  + a Helm chart (verified against the deploy docs, 2026-07-13). Added the
+  [self-hosted deploy runbook](runbooks/deploy-self-hosted.md).
+- Stays `draft` until a real deployment reaches a working, private, integrity-preserving URL.
+
 ## 2026-07-13 — ADR-0004: voice interface over the leadership chat
 
 - Added [ADR-0004](decisions/0004-voice-interface.md) (`draft`/proposed): ask the bundle by
