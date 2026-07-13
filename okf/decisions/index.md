@@ -16,3 +16,4 @@ Architecture/decision records, numbered. New note: copy `../templates/decision.m
 - [ADR-0001: Use Markdown + frontmatter for project memory](0001-markdown-frontmatter-project-memory.md) — *(accepted)*
 - [ADR-0002: Adopt OKF v0.1 as the bundle format](0002-adopt-okf-v0-1.md) — *(accepted)*
 - [ADR-0003: Leadership chat interface over the knowledge bundle](0003-leadership-chat-interface.md) — *(proposed)*
+- [ADR-0004: Voice interface over the leadership chat](0004-voice-interface.md) — *(proposed)*

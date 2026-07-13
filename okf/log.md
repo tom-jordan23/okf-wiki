@@ -14,6 +14,26 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-07-13 — ADR-0004: voice interface over the leadership chat
+
+- Added [ADR-0004](decisions/0004-voice-interface.md) (`draft`/proposed): ask the bundle by
+  voice, hear grounded answers. Voice is a thin **STT → the unchanged ADR-0003 text loop →
+  TTS** pipeline — the proven grounding stays put and voice is a transport shell around it.
+- Both STT and TTS route through the **same gateway** as chat (verified: LiteLLM exposes
+  `/v1/audio/transcriptions` and `/v1/audio/speech` in OpenAI format — see
+  [source note](sources/0002-litellm.md), re-verified 2026-07-13), so audio inherits the
+  gateway's spend tracking, approved-provider abstraction, and self-hostable no-egress route.
+- Provenance survives the audio channel via **dual-channel answering**: a `SPOKEN` track
+  (heard, confidence in words, no paths) plus a `PROVENANCE` track (shown/logged, paths +
+  `status`). One integrity contract, two renderings — voice is an opt-in prompt addendum, not
+  a fork of the text path.
+- Built the phase-1 voice POC under `chat/` (`voice.py`, `run_voice_poc.py`,
+  `voice_addendum.md`) reusing the phase-1 loop and probe set verbatim, adding an audio
+  round-trip and a new gate: **no note path may leak into the spoken channel**. Stdlib only;
+  offline `--dry-run` passes the plumbing. See the [voice-chat POC runbook](runbooks/voice-chat-poc.md).
+- Stays `draft` until the probes run on a real audio stack and the spoken track is judged
+  honest by ear (phase-1 verification); only that can move ADR-0004 toward *accepted*.
+
 ## 2026-07-08 — Built the phase-1 POC for ADR-0003 (leadership chat)
 
 - Implemented the [phase-1 POC runbook](runbooks/leadership-chat-poc.md) as runnable code
