@@ -92,6 +92,14 @@ repository:
   `enterprise/` directory is governed by a **separate license** (`enterprise/LICENSE`);
   a paid enterprise tier adds features such as SSO, RBAC, and audit logs. The
   self-hosted core is free — you pay only for the infrastructure it runs on.
+- **Ships as a container + Helm chart (verified against the deploy docs, accessed
+  2026-07-13).** LiteLLM publishes official Docker images to `ghcr.io/berriai/litellm`
+  (variants: `litellm`, `litellm-database` bundling Prisma/Postgres, `litellm-non_root`;
+  cosign-signed; pin a release tag, not `latest`) and documents Docker Compose, **Helm**,
+  and Terraform deployment. This is the evidence that the gateway can be packaged into the
+  self-deployable environment of [ADR-0005](../decisions/0005-self-deployable-environment.md)
+  — Compose now, Helm as the org-scale path — as a first-class service rather than a
+  hand-run process.
 
 These properties are exactly what ADR-0003 requires of a gateway: model choice, keys,
 rate limits, and token/cost accounting live on the **backend**, decoupled from the app

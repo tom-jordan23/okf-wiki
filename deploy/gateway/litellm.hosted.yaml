@@ -1,0 +1,31 @@
+# Gateway config for the HOSTED profile (ADR-0005): the three app-facing model aliases
+# routed to APPROVED CLOUD endpoints. The app only ever asks for these aliases -- which
+# real model backs each is decided HERE, so swapping providers never touches the app.
+#
+# Fill keys via deploy/.env (never in this file). Edit the `model:` lines to the models
+# your institution has actually approved. Examples below use Anthropic + OpenAI audio;
+# LiteLLM fronts Azure OpenAI, Bedrock, Vertex, etc. the same way (see
+# okf/sources/0002-litellm.md).
+
+model_list:
+  - model_name: okf-chat-model          # the loop's reasoning model
+    litellm_params:
+      model: anthropic/claude-sonnet-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: okf-stt-model           # speech -> text  (/v1/audio/transcriptions)
+    litellm_params:
+      model: openai/whisper-1
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: okf-tts-model           # text -> speech  (/v1/audio/speech)
+    litellm_params:
+      model: openai/tts-1
+      api_key: os.environ/OPENAI_API_KEY
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 120
+
+general_settings:
+  master_key: os.environ/MASTER_KEY     # the virtual key the app authenticates with
