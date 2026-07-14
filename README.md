@@ -16,10 +16,20 @@ rules.
 
 1. Clone or use this repo as a GitLab/GitHub template.
 2. Rewrite the **Project** section at the bottom of `CLAUDE.md`.
-3. Empty the worked examples in `okf/*/` (keep each reserved `index.md` and `templates/`).
-4. Start writing notes from the templates in `okf/templates/`.
+3. Empty the worked-example notes in `okf/*/` (keep each reserved `index.md` and
+   `templates/`), then start writing from the templates in `okf/templates/`.
+4. Decide what to keep of the shipped **assistant** (below):
+   - `chat/`, `deploy/`, and `scripts/` are reusable infrastructure — keep them as-is.
+   - ADRs `0003`–`0005` and the sources they cite (`sources/0002-litellm.md`,
+     `sources/0003-claude-agent-sdk.md`) *document that assistant* — keep them if you want
+     the design recorded in your bundle, or delete them with the other examples. If you
+     delete them, also drop the runbooks that reference them
+     (`runbooks/{leadership-chat,voice-chat}-poc.md`, `runbooks/deploy-self-hosted.md`).
+   - `chat/probes.json` is seeded against this template's example notes. The offline
+     `--dry-run` still works against any bundle (it only reads `index.md`), but before a
+     **real** probe run, re-point the probe questions/`expect_notes` at your own notes.
 
-No build step or tooling is required — it's Markdown all the way down.
+No build step or tooling is required for the notes — it's Markdown all the way down.
 
 ## Use it in Obsidian
 
@@ -48,8 +58,42 @@ okf/                 # the OKF v0.1 bundle (bundle root = this dir; open as Obsi
   runbooks/          # repeatable procedures
   sources/           # the evidence store: one note per cited source
   templates/         # frontmatter + per-type note templates
+chat/                # the chat + voice assistant over the bundle (code, not notes)
+deploy/              # one-command self-hosted deployment (Docker Compose)
 docs/                # optional, portable publish surface
 ```
+
+## Talk to your knowledge base (chat + voice)
+
+The bundle ships with an optional **assistant**: an agentic read/grep loop over `okf/`
+that answers questions **while keeping the integrity chain** — every answer shows the
+exact notes it rests on and their `status`, flags draft support, and declines rather than
+inventing a citation. It talks only to a model **gateway** (never a provider SDK), so
+which model backs it is config, not code. Voice is the same loop with a speech-in / spoken
+-answer shell around it. See the ADRs
+([0003](okf/decisions/0003-leadership-chat-interface.md),
+[0004](okf/decisions/0004-voice-interface.md),
+[0005](okf/decisions/0005-self-deployable-environment.md)) for the design.
+
+```sh
+# 1. Prove the whole loop offline first — no gateway, no API key, no Docker:
+python3 chat/run_poc.py --dry-run          # text; should end "exit 0", all probes [ok]
+python3 chat/run_voice_poc.py --dry-run    # + STT/TTS pipeline, dual spoken/shown channels
+
+# 2. Spin up the real web UI (text + push-to-talk) as one environment:
+python3 deploy/bootstrap.py                # interview: dataset, egress posture, access token
+cd deploy && docker compose up --build     # hosted (approved cloud model, BYO key)
+#   ...or fully local, nothing leaves the host:
+#   docker compose --profile no-egress up --build
+open http://localhost:8080
+```
+
+Full instructions: [`chat/README.md`](chat/README.md) (the headless POC + gateway modes),
+[`deploy/README.md`](deploy/README.md) (the deployable web/voice app and its two egress
+profiles), and the runbooks for
+[chat](okf/runbooks/leadership-chat-poc.md),
+[voice](okf/runbooks/voice-chat-poc.md), and
+[deployment](okf/runbooks/deploy-self-hosted.md).
 
 ## The integrity contract, in one breath
 

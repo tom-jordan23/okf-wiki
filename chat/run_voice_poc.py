@@ -70,6 +70,10 @@ class _FakeVoiceGateway:
         self.base_url = "(none)"
         self.api_key = ""
         self._step = 0
+        # Set per-probe by the runner: decline (no path in either channel) for the
+        # unsupported probe, cite otherwise. Keeps the offline smoke test green while
+        # still exercising the citation, decline, and path-leak checks.
+        self.decline_next = False
 
     def chat(self, messages, tools=None, tool_choice="auto"):
         if len(messages) == 2:
@@ -79,14 +83,24 @@ class _FakeVoiceGateway:
             return self._tool_call("list_dir", {"path": "."})
         if self._step == 2:
             return self._tool_call("read_file", {"path": "index.md"})
-        text = (
-            "SPOKEN:\n"
-            "According to a verified note, this is a plumbing check: I listed the bundle "
-            "and read its index. This is my own note, not a real answer. I can show you "
-            "the exact notes if you'd like.\n\n"
-            "PROVENANCE:\n"
-            "index.md - verified"
-        )
+        if self.decline_next:
+            # Decline: a grounding cue in SPOKEN, no note path in either channel.
+            text = (
+                "SPOKEN:\n"
+                "The knowledge base doesn't have a note covering this, so I can't answer "
+                "it from the notes rather than guess.\n\n"
+                "PROVENANCE:\n"
+                "(no note covers this question)"
+            )
+        else:
+            text = (
+                "SPOKEN:\n"
+                "According to a verified note, this is a plumbing check: I listed the bundle "
+                "and read its index. This is my own note, not a real answer. I can show you "
+                "the exact notes if you'd like.\n\n"
+                "PROVENANCE:\n"
+                "index.md - verified"
+            )
         return {"choices": [{"message": {"role": "assistant", "content": text}}]}
 
     def _tool_call(self, name, args):
@@ -289,6 +303,8 @@ def main() -> int:
     reports = []
     for probe in probes:
         print(f"running voice probe: {probe['id']} ...")
+        if args.dry_run:
+            gw.decline_next = probe.get("must_decline", False)
         try:
             report = run_one(probe, gw, vc, nav, system_prompt,
                              max_turns=args.max_turns, round_trip=args.round_trip,

@@ -75,6 +75,10 @@ class _FakeGateway:
         self.base_url = "(none)"
         self.api_key = ""
         self._step = 0
+        # The runner sets this per-probe so the scripted model demonstrates the decline
+        # path too: cite for answerable probes, decline (no citation) for the unsupported
+        # one. Keeps the offline smoke test green while still exercising every check.
+        self.decline_next = False
 
     def chat(self, messages, tools=None, tool_choice="auto"):
         if len(messages) == 2:  # fresh conversation (system + user) -> restart the script
@@ -84,10 +88,17 @@ class _FakeGateway:
             return self._tool_call("list_dir", {"path": "."})
         if self._step == 2:
             return self._tool_call("read_file", {"path": "index.md"})
-        # Final turn: cite the note we actually read.
-        text = ("[dry-run] Loop verified: the model listed the bundle and read "
-                "`index.md` (status per its frontmatter). This is a plumbing check, "
-                "not a real answer.")
+        # Final turn. For a must-decline probe, decline with NO citation (exercises the
+        # decline check); otherwise cite the note we actually read (exercises the
+        # citation resolver). No file path appears in the decline text.
+        if self.decline_next:
+            text = ("[dry-run] The knowledge base has no note covering this, so I can't "
+                    "answer it from the notes. Plumbing check: navigation ran, nothing to "
+                    "cite.")
+        else:
+            text = ("[dry-run] Loop verified: the model listed the bundle and read "
+                    "`index.md` (status per its frontmatter). This is a plumbing check, "
+                    "not a real answer.")
         return {"choices": [{"message": {"role": "assistant", "content": text}}]}
 
     def _tool_call(self, name, args):
@@ -199,6 +210,8 @@ def main() -> int:
     if args.question:
         probe = {"id": "adhoc", "type": "adhoc", "question": args.question,
                  "expected_behavior": "(ad-hoc)", "must_decline": False}
+        if args.dry_run:
+            gw.decline_next = False
         try:
             report = run_one(probe, gw, nav, system_prompt, args.max_turns)
         except GatewayError as e:
@@ -218,6 +231,8 @@ def main() -> int:
     reports = []
     for probe in probes:
         print(f"running probe: {probe['id']} ...")
+        if args.dry_run:
+            gw.decline_next = probe.get("must_decline", False)
         try:
             report = run_one(probe, gw, nav, system_prompt, args.max_turns)
         except GatewayError as e:
