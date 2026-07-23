@@ -33,6 +33,25 @@ RESERVED = {"index.md", "log.md"}
 # Fields whose presence implies the note makes verifiable claims and so should cite sources.
 CLAIM_STATUSES = {"verified", "disputed"}
 
+# --- Decision-support extension (NOT part of OKF; all checks below are WARNINGS) ---
+# These `type:` values are the decision-support layer (ADR-0006). OKF permits arbitrary
+# types, so an unknown type is never an error; we only apply positive per-type field rules
+# when the type matches one we know. Every rule here degrades to a warning.
+DS_TYPES = {"option", "criterion", "gate", "finding", "risk", "recommendation"}
+# Register types carry an append-only lifecycle `state` from a per-type enum.
+STATE_ENUMS = {
+    "gate": {"open", "closed", "closed-alternate"},
+    "finding": {"open", "resolved", "closed-alternate", "wontfix"},
+    "risk": {"open", "mitigated", "accepted", "realized", "closed"},
+}
+SEVERITY_ENUM = {"low", "medium", "high", "critical"}
+LEVEL_ENUM = {"low", "medium", "high"}  # likelihood / impact
+# The stable-id prefix each type conventionally uses (e.g. FND-3), for the hint message.
+ID_PREFIX = {
+    "option": "OPT", "criterion": "CRIT", "gate": "GATE",
+    "finding": "FND", "risk": "RISK", "recommendation": "REC",
+}
+
 
 def split_frontmatter(text: str):
     """Return (frontmatter_str | None, body_str). Frontmatter is the block between the
@@ -129,6 +148,32 @@ def main() -> int:
         review_by = parse_date(scalar(fm, "review_by"))
         if review_by and review_by < today and status != "stale":
             warnings.append(f"{path}: review_by {review_by} has passed; mark `stale` and re-verify")
+
+        # --- Decision-support extension: per-type field rules (warnings only) ---
+        if not reserved and type_val in DS_TYPES:
+            # Every decision-support note needs a stable cross-reference handle.
+            if not scalar(fm, "id"):
+                warnings.append(f"{path}: type '{type_val}' should carry a stable `id` (e.g. {ID_PREFIX[type_val]}-1)")
+            # Register types: append-only `state` from a per-type enum.
+            if type_val in STATE_ENUMS:
+                state = scalar(fm, "state")
+                allowed = STATE_ENUMS[type_val]
+                if not state:
+                    warnings.append(f"{path}: type '{type_val}' should carry a `state` ({' | '.join(sorted(allowed))})")
+                elif state not in allowed:
+                    warnings.append(f"{path}: `state: {state}` not valid for '{type_val}' (expected {' | '.join(sorted(allowed))})")
+            if type_val == "finding":
+                sev = scalar(fm, "severity")
+                if sev and sev not in SEVERITY_ENUM:
+                    warnings.append(f"{path}: `severity: {sev}` not in {' | '.join(sorted(SEVERITY_ENUM))}")
+            if type_val == "risk":
+                for field in ("likelihood", "impact"):
+                    val = scalar(fm, field)
+                    if val and val not in LEVEL_ENUM:
+                        warnings.append(f"{path}: `{field}: {val}` not in {' | '.join(sorted(LEVEL_ENUM))}")
+            if type_val == "recommendation" and not re.search(r"(?mi)^#{1,6}\s+open decisions\b", body):
+                warnings.append(f"{path}: recommendation is missing an `## Open decisions` section "
+                                f"(the 'for reaction, not decision' convention)")
 
         # --- Link resolution (warnings only; OKF tolerates broken links) ---
         for target in re.findall(r"\]\(([^)]+)\)", body):

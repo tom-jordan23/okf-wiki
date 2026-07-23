@@ -92,15 +92,25 @@ Ranked by how strongly the three efforts converged on them (all-three = stronges
 
 ## Phasing
 
-1. **No-schema-change first:** `preso/` scaffold, `artifacts/` + `.gitignore`, and a
-   decision-support runbook encoding the Tier-1 recommendation pattern.
-2. **Extend the schema:** new `type:` values + templates + `validate.py` enforcement;
-   `METHODOLOGY.md`.
-3. **Agent + design layers:** `.claude/agents/` producer/checker + multi-lens review;
-   `visual-vocabulary` concept.
+1. **No-schema-change first** *(shipped 2026-07-23)*: `preso/` scaffold, `artifacts/` +
+   `.gitignore`, and a decision-support runbook encoding the Tier-1 recommendation pattern.
+2. **Extend the schema** *(shipped 2026-07-23)*: six new `type:` values (`option`,
+   `criterion`, `gate`, `finding`, `risk`, `recommendation`) — one note per thing, in their
+   own folders — with templates, `validate.py` enforcement (warnings for missing `id`,
+   invalid register `state`/`severity`/`likelihood`/`impact`, a `recommendation` missing its
+   `## Open decisions`), and a `METHODOLOGY.md` companion. `interface-memo` (a Tier-3
+   single-effort idea) was deferred.
+3. **Agent + design layers** *(shipped 2026-07-23)*: `.claude/agents/` producer/checker
+   (`ds-producer`, `ds-checker` — the checker is read-only and may not edit what it checks)
+   + four concurrent review lenses (`review-standards`, `review-security`, `review-redteam`,
+   `review-integrity`) feeding the findings register; and the
+   [`visual-vocabulary`](../concepts/visual-vocabulary.md) concept.
 
-Each phase must keep the decision-support layer **optional and deletable**, so a pure
+Each phase keeps the decision-support layer **optional and deletable**, so a pure
 knowledge-capture effort can clone the template and ignore it.
+
+Remaining (roadmap): CI wiring, and `validate.py` cross-reference checks (e.g. option `id`s
+named in a matrix resolve to real option notes).
 
 ## Sources
 

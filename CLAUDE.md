@@ -76,7 +76,8 @@ Standard (non-reserved) note — OKF fields first, then our extension block:
 ```yaml
 ---
 # --- OKF v0.1 ---
-type: concept            # REQUIRED, non-empty. concept | decision | architecture | runbook | source
+type: concept            # REQUIRED, non-empty. Core: concept | decision | architecture | runbook | source.
+                         # Decision-support extension adds: option | criterion | gate | finding | risk | recommendation.
 title: Human Readable Title
 description: One-line summary.
 tags: [example]
@@ -96,6 +97,11 @@ Reserved files (`index.md`, `log.md`) use a minimal block with **no `type`** —
 `okf/index.md` for the pattern. Source notes add evidence fields and may use OKF's
 `resource` for the cited URL — see `okf/templates/source.md`.
 
+Decision-support notes add a small set of extension fields — `id` (a stable
+cross-reference handle like `FND-3`; OKF identity is still the file path), register
+`state`, `severity`, `likelihood`/`impact` — each with an enum `validate.py` checks. See
+the [field reference](okf/templates/frontmatter.md) and the per-type templates.
+
 ## Note types
 
 | Type           | Folder               | Reserved? | Use for                                       |
@@ -105,8 +111,18 @@ Reserved files (`index.md`, `log.md`) use a minimal block with **no `type`** —
 | architecture   | `okf/architecture/`  | no        | How the system / effort is structured.        |
 | runbook        | `okf/runbooks/`      | no        | A repeatable procedure.                        |
 | source         | `okf/sources/`       | no        | The evidence store: one note per cited source.|
+| option         | `okf/options/`       | no        | *(decision-support)* One evaluated option.    |
+| criterion      | `okf/criteria/`      | no        | *(decision-support)* One evaluation criterion.|
+| gate           | `okf/gates/`         | no        | *(decision-support)* A decision gate; append-only.|
+| finding        | `okf/findings/`      | no        | *(decision-support)* A review finding; append-only.|
+| risk           | `okf/risks/`         | no        | *(decision-support)* A risk; append-only.     |
+| recommendation | `okf/recommendations/`| no       | *(decision-support)* A phased recommendation. |
 | (index)        | any folder           | **yes**   | `index.md` — directory listing. No `type`.    |
 | (log)          | `okf/log.md`         | **yes**   | Dated change history. No `type`.              |
+
+The six *(decision-support)* types are the optional [decision-support extension](#decision-support-extension-optional)
+— an effort doing pure knowledge capture can delete those six folders, their templates, and
+`METHODOLOGY.md` and lose nothing else.
 
 ## Linking & Obsidian
 
@@ -141,9 +157,19 @@ so recommendations carry the same provenance as any other note. It is additive a
 
 - **The pattern** is a runbook, not new machinery:
   `okf/runbooks/run-a-decision-support-effort.md`. Options, criteria, the ruled-out set,
-  the tradeoff matrix, and the recommendation live as **sections inside ordinary
-  `architecture` notes** (Phase 1 — no schema change). A deletable worked example is
-  `okf/architecture/EXAMPLE-datastore-options.md`.
+  the tradeoff matrix, and the recommendation can live as **sections inside ordinary
+  `architecture` notes** (Phase 1 — no schema change; deletable worked example
+  `okf/architecture/EXAMPLE-datastore-options.md`), **or** — since Phase 2 — as
+  **first-class validated note types** (`option`, `criterion`, `gate`, `finding`, `risk`,
+  `recommendation`), one note per thing, in their own folders. The same datastore example
+  in first-class form is `okf/recommendations/EXAMPLE-datastore-recommendation.md` and its
+  linked option/criterion/gate/finding/risk notes. Templates for all six are in
+  `okf/templates/`; `METHODOLOGY.md` (repo root) is the why/how-to-reproduce companion.
+- **Roles are separated** so no one signs off on their own work (`.claude/agents/`):
+  `ds-producer` writes; `ds-checker` verifies and is **read-only by design** (it may not
+  edit what it checks); and four concurrent review lenses — `review-standards`,
+  `review-security`, `review-redteam`, `review-integrity` — feed the findings register.
+  Diagrams and decks follow `okf/concepts/visual-vocabulary.md`.
 - **Conventions to keep honest:** confidence rates **feasibility, not desirability**;
   recommendations are framed **"for reaction, not decision"** (a phased path + explicit open
   decisions); strength-of-evidence travels with each claim; **absence of evidence is an
@@ -155,8 +181,11 @@ so recommendations carry the same provenance as any other note. It is additive a
   enter the bundle. Never cite a raw artifact — cite the `source` note derived from it.
 
 Design and phasing: `okf/decisions/0006-decision-support-extension.md` and
-`okf/architecture/decision-support-extension.md`. Phases 2–3 (new `type:` values with
-`validate.py` enforcement, a methodology doc, producer/checker agents) are not built yet.
+`okf/architecture/decision-support-extension.md`. **Phases 1–3 are now built:** the runbook
++ `preso/` + `artifacts/` (Phase 1), the six first-class types + templates + `validate.py`
+enforcement + `METHODOLOGY.md` (Phase 2), and the `.claude/agents/` producer/checker +
+review roster + `visual-vocabulary` concept (Phase 3). The whole layer stays optional and
+deletable. The interface-memo type (a Tier-3 single-effort idea) was intentionally deferred.
 
 ## Validation
 
@@ -170,8 +199,11 @@ python3 scripts/validate.py --today 2026-01-01    # override date for staleness 
 It enforces OKF conformance as **errors** (frontmatter parseable, non-empty `type` on
 non-reserved files, no `type` on reserved files — non-zero exit on failure) and reports
 integrity issues as **warnings** (claim-bearing notes with empty `sources`, overdue
-`review_by`, unresolved links). No third-party dependencies. Run on demand for now; CI
-wiring is on the roadmap.
+`review_by`, unresolved links). The decision-support types add more **warnings** (a missing
+`id`; an invalid register `state`/`severity`/`likelihood`/`impact`; a `recommendation` with
+no `## Open decisions` section) — never errors, because OKF permits arbitrary `type:` values,
+so leaving the rails stays a warning, not a conformance failure. No third-party
+dependencies. Run on demand for now; CI wiring is on the roadmap.
 
 ## Roadmap (not built yet)
 
@@ -180,12 +212,14 @@ Deferred by choice, in rough order:
 1. CI (GitLab CI / GitHub Actions) that runs `scripts/validate.py` on merge requests.
 2. Issue + MR/PR templates wired to the integrity workflow.
 3. A docs-site generator config for publishing `docs/`.
-4. Decision-support extension **Phases 2–3** (see
-   `okf/architecture/decision-support-extension.md`): first-class `type:` values
-   (`option`, `criterion`, `gate`, `finding`, `risk`, `recommendation`) with templates and
-   `validate.py` enforcement, a `METHODOLOGY.md` companion, a `.claude/agents/`
-   producer/checker + multi-lens review roster, and a `visual-vocabulary` design-system
-   concept. (Phase 1 shipped: the runbook, `preso/`, and `artifacts/`.)
+4. Decision-support extension **Phases 1–3 shipped** (see
+   `okf/architecture/decision-support-extension.md`): the runbook + `preso/` + `artifacts/`
+   (Phase 1); the six first-class `type:` values (`option`, `criterion`, `gate`, `finding`,
+   `risk`, `recommendation`) with templates + `validate.py` enforcement + `METHODOLOGY.md`
+   (Phase 2); and the `.claude/agents/` producer/checker + multi-lens review roster + the
+   `visual-vocabulary` concept (Phase 3). Remaining polish: the deferred `interface-memo`
+   type, and `validate.py` cross-reference checks (e.g. option `id`s named in a matrix
+   resolve to real notes).
 
 ## Project
 

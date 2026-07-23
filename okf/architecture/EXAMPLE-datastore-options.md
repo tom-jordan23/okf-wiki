@@ -22,6 +22,12 @@ sources: []
 > product, benchmark, or vendor is cited (which is exactly why this note stays `draft`
 > with `confidence: low` and empty `sources`: it makes no verified claims). Delete it, and
 > copy its shape, when you start a real effort.
+>
+> This is the **Phase-1 form** — the whole decision as sections in one `architecture` note.
+> The same decision split into **Phase-2 first-class notes** (one per option/criterion/gate/
+> finding/risk, tied together by a `recommendation`) is
+> [EXAMPLE: Datastore recommendation](../recommendations/EXAMPLE-datastore-recommendation.md).
+> Both forms are valid; pick one per decision.
 
 ## Frame
 

@@ -14,3 +14,4 @@ review_by: 2027-06-15
 Reusable ideas, terms, and factual claims. New note: copy `../templates/concept.md`.
 
 - [OKF-Compatible Frontmatter Schema](okf-frontmatter-schema.md) — the frontmatter every note uses, and why each field exists.
+- [Visual Vocabulary](visual-vocabulary.md) — CVD-safe design-system rules for decision-support diagrams and decks *(optional extension)*.

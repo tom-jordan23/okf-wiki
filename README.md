@@ -58,6 +58,12 @@ okf/                 # the OKF v0.1 bundle (bundle root = this dir; open as Obsi
   runbooks/          # repeatable procedures
   sources/           # the evidence store: one note per cited source
   templates/         # frontmatter + per-type note templates
+  recommendations/   # optional: phased recommendations (decision-support ext.)
+  options/ criteria/ # optional: evaluated options + criteria (decision-support ext.)
+  gates/ findings/ risks/  # optional: append-only registers (decision-support ext.)
+CLAUDE.md            # (also) note-types table + integrity rules
+METHODOLOGY.md       # optional: how a recommendation is produced (decision-support ext.)
+.claude/agents/      # optional: producer/checker + review-lens roster (decision-support ext.)
 chat/                # the chat + voice assistant over the bundle (code, not notes)
 deploy/              # one-command self-hosted deployment (Docker Compose)
 docs/                # optional, portable publish surface
@@ -72,14 +78,23 @@ evaluate options against criteria and hand a reviewer a phased recommendation. A
 extension supports that *inside* OKF, so recommendations keep the same provenance the rest
 of the bundle has. It is additive and deletable; a pure knowledge-capture effort can ignore
 it. See [ADR-0006](okf/decisions/0006-decision-support-extension.md) and the
-[roadmap](okf/architecture/decision-support-extension.md). Phase 1 ships:
+[roadmap](okf/architecture/decision-support-extension.md). All three phases now ship:
 
-- The [Run a Decision-Support Effort](okf/runbooks/run-a-decision-support-effort.md) runbook
-  (options → criteria → tradeoff matrix → recommendation *for reaction, not decision*), with
-  a deletable worked example, [EXAMPLE: Datastore options](okf/architecture/EXAMPLE-datastore-options.md).
+- **The pattern** — the [Run a Decision-Support Effort](okf/runbooks/run-a-decision-support-effort.md)
+  runbook (options → criteria → tradeoff matrix → recommendation *for reaction, not decision*).
+  Author it either as sections in one `architecture` note
+  ([EXAMPLE](okf/architecture/EXAMPLE-datastore-options.md)) or as **first-class, validated
+  note types** — `option`, `criterion`, `gate`, `finding`, `risk`, `recommendation`, one note
+  per thing ([worked example](okf/recommendations/EXAMPLE-datastore-recommendation.md)).
+  `scripts/validate.py` checks their fields; [`METHODOLOGY.md`](METHODOLOGY.md) is the
+  how-to-reproduce companion.
+- **Separated roles** — [`.claude/agents/`](.claude/agents/): a producer that writes and a
+  **read-only** checker that may not edit what it checks, plus four concurrent review lenses
+  (standards / security / red-team / integrity) feeding the findings register.
 - [`preso/`](preso/README.md) — decks built from Markdown (Markdown is the source of record;
   every slide traces to a note). The only third-party dependency in the repo, and it is
-  needed *only* here.
+  needed *only* here. Diagrams and decks follow the
+  [visual-vocabulary](okf/concepts/visual-vocabulary.md) design system.
 - [`artifacts/`](artifacts/README.md) — a git-ignored staging area for raw inputs; only
   sanitized `source` notes ever enter the bundle.
 

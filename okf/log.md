@@ -14,6 +14,43 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-07-23 — Decision-support extension, Phases 2 & 3 (schema + agents/design)
+
+- Built Phases 2–3 of [ADR-0006](decisions/0006-decision-support-extension.md). The layer
+  stays optional and deletable; `validate.py` stays stdlib-only; OKF conformance unchanged
+  (still `PASS`, and the new checks are **warnings**, never errors — OKF permits any `type:`).
+- **Phase 2 — schema.** Promoted the decision-support artifacts from sections-in-a-note to
+  six first-class `type:` values, one note per thing, each in its own folder:
+  [recommendations](recommendations/index.md), [options](options/index.md),
+  [criteria](criteria/index.md), [gates](gates/index.md), [findings](findings/index.md),
+  [risks](risks/index.md). Added a [template](templates/frontmatter.md) per type and taught
+  `validate.py` the extension fields (`id`, register `state`, `severity`,
+  `likelihood`/`impact`) and the `recommendation` `## Open decisions` rule — verified the
+  rules both fire on bad input and pass the worked examples. One-note-per-entry (not a prose
+  table) is deliberate: it's what makes findings/gates machine-checkable, ADR-0006's stated
+  win.
+- Added a **deletable worked set** reusing the datastore scenario so both forms coexist:
+  [REC-1](recommendations/EXAMPLE-datastore-recommendation.md) tying together a viable
+  [option](options/EXAMPLE-datastore-managed-pg.md), a
+  [ruled-out option](options/EXAMPLE-datastore-shared-db.md), a
+  [criterion](criteria/EXAMPLE-reversibility.md), a [gate](gates/EXAMPLE-datastore-launch-gate.md),
+  a [finding](findings/EXAMPLE-lockin-review.md), and a [risk](risks/EXAMPLE-serverless-lockin.md)
+  — all illustrative fiction, so they never leave `draft`. Cross-linked to the Phase-1
+  [architecture example](architecture/EXAMPLE-datastore-options.md).
+- Added **`METHODOLOGY.md`** (repo root, outside the bundle) — the why/how-to-reproduce
+  companion to the runbook.
+- **Phase 3 — agents + design.** Added `.claude/agents/`: a **producer/checker split**
+  (`ds-producer` writes; `ds-checker` is **read-only by design** — it may not edit what it
+  checks) plus four concurrent, mutually-blind **review lenses** (`review-standards`,
+  `review-security`, `review-redteam`, `review-integrity`) that feed the findings register.
+  Added the [`visual-vocabulary`](concepts/visual-vocabulary.md) concept (CVD-safe; colour
+  encodes ownership only; fixed shape/line lexicon; Mermaid→SVG→pptx, generated never
+  hand-edited).
+- Wired it through `CLAUDE.md` (note-types table, schema note, validation + roadmap,
+  decision-support section), the [layout note](architecture/knowledge-base-layout.md), the
+  [roadmap note](architecture/decision-support-extension.md) phasing, and the bundle/section
+  indexes. `interface-memo` (a Tier-3 single-effort idea) intentionally deferred.
+
 ## 2026-07-23 — Decision-support extension, Phase 1 (no schema change)
 
 - Built the Phase-1, no-schema-change part of [ADR-0006](decisions/0006-decision-support-extension.md).
