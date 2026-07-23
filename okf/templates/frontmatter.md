@@ -4,12 +4,12 @@ type: concept
 title: "Frontmatter Schema Reference"
 description: The canonical field list every note copies — OKF core plus integrity extension.
 tags: [meta, schema, okf]
-timestamp: 2026-06-15
+timestamp: 2026-07-23
 # --- integrity extension (NOT part of OKF) ---
 status: verified
 confidence: high
 created: 2026-06-15
-last_verified: 2026-06-15
+last_verified: 2026-07-23
 verified_by: claude
 review_by: 2026-12-15
 sources:
@@ -47,6 +47,36 @@ explicitly permits). See `CLAUDE.md` for the integrity rules these fields serve.
 
 Source notes add evidence fields (`source_type`, `author`, `publisher`, `url`,
 `published`, `accessed`, `credibility`) — see `source.md`.
+
+## Decision-support fields (extension, optional)
+
+The [decision-support types](../architecture/decision-support-extension.md) (`option`,
+`criterion`, `gate`, `finding`, `risk`, `recommendation`) add the fields below. `validate.py`
+checks each enum and emits a **warning** (never an error — OKF permits any `type:`) when one
+is missing or invalid. Ignore this whole table if you do pure knowledge capture.
+
+| Field        | Types                     | Values / format                                   | Meaning |
+|--------------|---------------------------|---------------------------------------------------|---------|
+| `id`         | all six                   | `OPT-1`, `CRIT-3`, `GATE-1`, `FND-1`, `RISK-1`, `REC-1` | Stable cross-reference handle. **Not** OKF identity (still the file path) — a citable label for matrices, decks, and links. |
+| `decision`   | option, criterion, recommendation | link or one-line              | The decision this note serves. |
+| `viable`     | option                    | `yes \| no`                                        | `no` ⇒ it's in the ruled-out set; pair with `ruled_out_by`. |
+| `ruled_out_by`| option                   | constraint name                                    | The constraint that kills a `viable: no` option. |
+| `weight`     | criterion                 | `high \| medium \| low`                            | Optional: how much the criterion counts. |
+| `state`      | gate, finding, risk       | per-type enum (below)                              | Append-only lifecycle — distinct from `status` (verification). |
+| `severity`   | finding                   | `low \| medium \| high \| critical`                | How bad the finding is. |
+| `lens`       | finding                   | `standards \| security \| red-team \| integrity \| …` | Which review lens raised it. |
+| `likelihood` | risk                      | `low \| medium \| high`                            | Chance the risk is realized. |
+| `impact`     | risk                      | `low \| medium \| high`                            | Cost if it is. |
+| `options`    | recommendation            | list of option ids/links                           | The options weighed. |
+
+**Register `state` enums** (append-only — never rewrite a closed row, append a dated line):
+
+- `gate`: `open \| closed \| closed-alternate`
+- `finding`: `open \| resolved \| closed-alternate \| wontfix`
+- `risk`: `open \| mitigated \| accepted \| realized \| closed`
+
+A `recommendation` must also contain an `## Open decisions` section (the "for reaction, not
+decision" convention) — `validate.py` warns if it's missing.
 
 ## Identity & links
 

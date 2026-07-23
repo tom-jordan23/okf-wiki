@@ -36,6 +36,22 @@ retire a note. Start here; follow the links.
 | [Sources](sources/index.md)                | The evidence store.                       |
 | [Templates](templates/frontmatter.md)      | Frontmatter + per-type note templates.    |
 
+### Decision-support extension (optional)
+
+The layer for evaluating options into a phased recommendation, with the same provenance as
+any note (ADR-[0006](decisions/0006-decision-support-extension.md)). Delete these six folders
++ `METHODOLOGY.md` for a pure knowledge-capture effort. Start from the
+[runbook](runbooks/run-a-decision-support-effort.md).
+
+| Section                                        | What lives here                          |
+|------------------------------------------------|------------------------------------------|
+| [Recommendations](recommendations/index.md)    | Phased recommendations, for reaction.    |
+| [Options](options/index.md)                    | Options under evaluation.                |
+| [Criteria](criteria/index.md)                  | Evaluation criteria (matrix columns).    |
+| [Gates](gates/index.md)                        | Decision-gate register (append-only).    |
+| [Findings](findings/index.md)                  | Review-findings register (append-only).  |
+| [Risks](risks/index.md)                        | Risk register (append-only).             |
+
 ## Worked examples (delete when starting a real effort)
 
 The notes currently in each section document this template itself. They are real,

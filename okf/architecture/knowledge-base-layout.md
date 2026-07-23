@@ -4,12 +4,12 @@ type: architecture
 title: "Knowledge Base Layout"
 description: The OKF bundle's folders, note types, reserved files, and cross-linking.
 tags: [architecture, meta, okf]
-timestamp: 2026-06-15
+timestamp: 2026-07-23
 # --- integrity extension (NOT part of OKF) ---
 status: verified
 confidence: high
 created: 2026-06-15
-last_verified: 2026-06-15
+last_verified: 2026-07-23
 verified_by: claude
 review_by: 2026-12-15
 sources:
@@ -32,6 +32,13 @@ okf/                 OKF bundle root (open as the Obsidian vault)
   runbooks/          repeatable procedures
   sources/           the evidence store
   templates/         frontmatter + per-type templates
+  # --- decision-support extension (optional, deletable) ---
+  recommendations/   phased recommendations (for reaction, not decision)
+  options/           one evaluated option per note
+  criteria/          one evaluation criterion per note
+  gates/             decision-gate register (append-only)
+  findings/          review-findings register (append-only)
+  risks/             risk register (append-only)
 ```
 
 ## Components
@@ -44,6 +51,10 @@ okf/                 OKF bundle root (open as the Obsidian vault)
 - **`sources/`** — the evidence store. Factual claims elsewhere link here so a fact can
   be traced to its evidence ([claim-level provenance](../concepts/okf-frontmatter-schema.md)).
 - **`templates/`** — copy these to create new notes consistently.
+- **Decision-support folders** (`recommendations/`, `options/`, `criteria/`, `gates/`,
+  `findings/`, `risks/`) — the optional [decision-support extension](decision-support-extension.md).
+  One note per option/criterion/gate/finding/risk/recommendation, each a real `type:` that
+  `validate.py` checks. Deletable in full for pure knowledge-capture efforts.
 
 ## Constraints & rationale
 
