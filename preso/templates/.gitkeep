@@ -1,0 +1,10 @@
+# Branded .pptx/.potx templates go in this directory.
+#
+# They are git-ignored (see the repo .gitignore) because org templates are often
+# proprietary. Symlink yours in, or commit only a neutral house template you own, then
+# point the builder at it:
+#
+#     PRESO_TEMPLATE=templates/your-brand.pptx ./build.sh
+#
+# The builder works with no template at all (plain slides). This .gitkeep just keeps the
+# directory present in a fresh clone.

@@ -132,6 +132,32 @@ Reserved files (`index.md`, `log.md`) use a minimal block with **no `type`** —
   changes.
 - Treat `docs/` as the optional publish surface; keep markdown portable.
 
+## Decision-support extension (optional)
+
+Beyond static knowledge capture, this template supports **decision-support / recommendation**
+work — evaluate options against criteria and produce a phased recommendation — *inside* OKF,
+so recommendations carry the same provenance as any other note. It is additive and
+**deletable**: an effort doing pure knowledge capture can ignore or remove it.
+
+- **The pattern** is a runbook, not new machinery:
+  `okf/runbooks/run-a-decision-support-effort.md`. Options, criteria, the ruled-out set,
+  the tradeoff matrix, and the recommendation live as **sections inside ordinary
+  `architecture` notes** (Phase 1 — no schema change). A deletable worked example is
+  `okf/architecture/EXAMPLE-datastore-options.md`.
+- **Conventions to keep honest:** confidence rates **feasibility, not desirability**;
+  recommendations are framed **"for reaction, not decision"** (a phased path + explicit open
+  decisions); strength-of-evidence travels with each claim; **absence of evidence is an
+  explicit finding**, not a silent omission.
+- **`preso/`** builds leadership decks from Markdown (the Markdown is the source of record;
+  every slide claim traces to a note). It is the **only** part of the repo needing a
+  third-party dependency (`python-pptx`), scoped to `preso/requirements.txt`.
+- **`artifacts/`** is git-ignored staging for raw inputs; only sanitized `source` notes ever
+  enter the bundle. Never cite a raw artifact — cite the `source` note derived from it.
+
+Design and phasing: `okf/decisions/0006-decision-support-extension.md` and
+`okf/architecture/decision-support-extension.md`. Phases 2–3 (new `type:` values with
+`validate.py` enforcement, a methodology doc, producer/checker agents) are not built yet.
+
 ## Validation
 
 Run the checker before committing changes to the bundle:
@@ -154,6 +180,12 @@ Deferred by choice, in rough order:
 1. CI (GitLab CI / GitHub Actions) that runs `scripts/validate.py` on merge requests.
 2. Issue + MR/PR templates wired to the integrity workflow.
 3. A docs-site generator config for publishing `docs/`.
+4. Decision-support extension **Phases 2–3** (see
+   `okf/architecture/decision-support-extension.md`): first-class `type:` values
+   (`option`, `criterion`, `gate`, `finding`, `risk`, `recommendation`) with templates and
+   `validate.py` enforcement, a `METHODOLOGY.md` companion, a `.claude/agents/`
+   producer/checker + multi-lens review roster, and a `visual-vocabulary` design-system
+   concept. (Phase 1 shipped: the runbook, `preso/`, and `artifacts/`.)
 
 ## Project
 

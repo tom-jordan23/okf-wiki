@@ -11,9 +11,23 @@ Thumbs.db
 *~
 .*.swp
 
-# Obsidian workspace state (keep notes, ignore local UI state)
-.obsidian/workspace*
-.obsidian/cache
+# Obsidian workspace state (keep notes, ignore local UI state). Depth-agnostic so it also
+# covers the vault when opened at okf/ (the recommended vault root).
+**/.obsidian/workspace*
+**/.obsidian/cache
+**/.obsidian/appearance.json
+
+# Decision-support extension: raw-input staging (private, unverified). Only sanitized
+# `source` notes derived from these ever enter the bundle. Keep the README, ignore inputs.
+/artifacts/*
+!/artifacts/README.md
+
+# preso/: branded deck templates are often proprietary — keep them out of the repo.
+# Rendered decks (*.pptx alongside their .md) are a publish surface; commit those if you
+# want them versioned. Office lock files are never committed.
+/preso/templates/*.pptx
+/preso/templates/*.potx
+~$*
 
 # Generated docs-site output (when a generator is added later)
 /site/

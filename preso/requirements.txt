@@ -1,0 +1,5 @@
+# The only third-party dependency in this repo, and it is optional: it is needed *only*
+# to build decks under preso/. The okf/ bundle, scripts/validate.py, and everything else
+# remain pure-stdlib. Install just this when you want to render slides:
+#     pip install -r preso/requirements.txt
+python-pptx>=0.6.21

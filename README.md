@@ -61,7 +61,27 @@ okf/                 # the OKF v0.1 bundle (bundle root = this dir; open as Obsi
 chat/                # the chat + voice assistant over the bundle (code, not notes)
 deploy/              # one-command self-hosted deployment (Docker Compose)
 docs/                # optional, portable publish surface
+preso/               # optional: build leadership decks from Markdown (decision-support ext.)
+artifacts/           # optional: git-ignored staging for raw inputs (decision-support ext.)
 ```
+
+## Decision-support extension (optional)
+
+The template started as a knowledge wiki, but its common use is **decision support** —
+evaluate options against criteria and hand a reviewer a phased recommendation. An optional
+extension supports that *inside* OKF, so recommendations keep the same provenance the rest
+of the bundle has. It is additive and deletable; a pure knowledge-capture effort can ignore
+it. See [ADR-0006](okf/decisions/0006-decision-support-extension.md) and the
+[roadmap](okf/architecture/decision-support-extension.md). Phase 1 ships:
+
+- The [Run a Decision-Support Effort](okf/runbooks/run-a-decision-support-effort.md) runbook
+  (options → criteria → tradeoff matrix → recommendation *for reaction, not decision*), with
+  a deletable worked example, [EXAMPLE: Datastore options](okf/architecture/EXAMPLE-datastore-options.md).
+- [`preso/`](preso/README.md) — decks built from Markdown (Markdown is the source of record;
+  every slide traces to a note). The only third-party dependency in the repo, and it is
+  needed *only* here.
+- [`artifacts/`](artifacts/README.md) — a git-ignored staging area for raw inputs; only
+  sanitized `source` notes ever enter the bundle.
 
 ## Talk to your knowledge base (chat + voice)
 

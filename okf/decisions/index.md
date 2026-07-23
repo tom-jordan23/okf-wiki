@@ -18,3 +18,4 @@ Architecture/decision records, numbered. New note: copy `../templates/decision.m
 - [ADR-0003: Leadership chat interface over the knowledge bundle](0003-leadership-chat-interface.md) — *(proposed)*
 - [ADR-0004: Voice interface over the leadership chat](0004-voice-interface.md) — *(proposed)*
 - [ADR-0005: Self-deployable environment with a trust-aware bootstrap](0005-self-deployable-environment.md) — *(proposed)*
+- [ADR-0006: Adopt a decision-support extension to the base template](0006-decision-support-extension.md) — *(proposed)*

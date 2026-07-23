@@ -14,6 +14,50 @@ review_by: 2027-06-15
 Newest entries first. One entry per meaningful change or decision. Keep it terse; link
 to the notes that hold the detail.
 
+## 2026-07-23 — Decision-support extension, Phase 1 (no schema change)
+
+- Built the Phase-1, no-schema-change part of [ADR-0006](decisions/0006-decision-support-extension.md).
+  All additive and deletable; the OKF core and `validate.py` are unchanged and stay
+  stdlib-only.
+- Added the [Run a Decision-Support Effort](runbooks/run-a-decision-support-effort.md)
+  runbook (`draft`): options → criteria → ruled-out set → tradeoff matrix → recommendation
+  *for reaction, not decision*, expressed as sections inside ordinary `architecture` notes.
+  Conventions baked in: feasibility ≠ desirability, strength-of-evidence per claim,
+  absence-of-evidence as an explicit finding.
+- Added a deletable worked example, [EXAMPLE: Datastore options](architecture/EXAMPLE-datastore-options.md)
+  (`draft`, illustrative fiction — makes no verifiable claims, so it never leaves `draft`).
+- Added `preso/` (outside the bundle): a `python-pptx` deck builder driven by Markdown
+  speaker-scripts (Markdown = source of record; every slide traces to a note). It is the
+  only third-party dependency in the repo, scoped to `preso/requirements.txt`; `build.sh`
+  fails helpfully when it's absent. Built and verified the example deck renders (title + 4
+  slides + speaker notes); the generated `.pptx` is not committed (regenerable).
+- Added `artifacts/` (git-ignored staging for raw inputs; only sanitized `source` notes
+  enter the bundle) and hardened `.gitignore` (raw artifacts, branded deck templates,
+  Office lock files, depth-agnostic Obsidian ignores for the vault opened at `okf/`).
+- Wired it into `README.md`, `CLAUDE.md` (new "Decision-support extension (optional)"
+  section + Phase 2–3 roadmap), and the runbook/architecture indexes. Bundle passes
+  `validate.py` with no new warnings.
+
+## 2026-07-23 — ADR-0006: decision-support extension (roadmap)
+
+- Reviewed three private efforts built on clones of this template (institution-specific;
+  anonymized here, not part of this public template) to synthesize a decision-support
+  feature set. Key finding: **two of three abandoned the `okf/` bundle** because the base
+  has no vocabulary for options-in-flight, findings, gates, or recommendations; only one
+  kept OKF and did the work in ordinary `architecture` notes with **no schema change**.
+- Added [ADR-0006](decisions/0006-decision-support-extension.md) (`draft`/proposed): adopt
+  a decision-support extension and build it by **extending OKF** (new `type:` values +
+  `validate.py` enforcement), not forking to unvalidated prose registers.
+- Added the [Decision-Support Extension roadmap](architecture/decision-support-extension.md)
+  (`draft`): the convergent features ranked by cross-project signal (Tier 1 = all three
+  built it) — a `preso/` deck-from-code tier, the options→criteria→matrix→phased-
+  recommendation pattern, findings/review registers, producer/checker agents, a
+  `METHODOLOGY.md`, and new note types — plus a three-phase plan that keeps the layer
+  optional and deletable.
+- Stays `draft` until the extension is designed and a first artifact is built; the
+  reviewed methodology docs should then be captured as `internal-doc` `source` notes so
+  the decision's basis is traceable.
+
 ## 2026-07-13 — ADR-0005: self-deployable environment + thin web/voice app
 
 - Added [ADR-0005](decisions/0005-self-deployable-environment.md) (`draft`/proposed): package
